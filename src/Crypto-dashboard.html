@@ -8,8 +8,10 @@
             id="coinbase" 
             handle-as="json"
             on-response="_handleResponse"
-        >
-        </iron-ajax>
+        ></iron-ajax>
+        <template is="dom-repeat" items="[[currencies]]">
+                <p> [[item.name]]: [[item.price]] </p>
+        </template>
     </template>
 
     <script>
@@ -20,9 +22,9 @@
                     currencies: {
                         type: Array,
                         value: [
-                            { code: 'BTC', name: 'Bitcoin' },
-                            { code: 'ETH', name: 'Etherium' },
-                            { code: 'LTC', name: 'Lightcoin' }
+                            { code: 'BTC', name: 'Bitcoin', price: 0 },
+                            { code: 'ETH', name: 'Etherium', price: 0 },
+                            { code: 'LTC', name: 'Lightcoin', price: 0 }
                         ]
                     }
                 };
@@ -45,7 +47,15 @@
             }
 
             _handleResponse( response ) {
-                console.log( response );
+                const unwrappedResponse = response.detail.__data;
+                if( unwrappedResponse.status == 200 ) {
+                    this._handleCryptoUpdate( unwrappedResponse.response.data );
+                }
+            }
+
+            _handleCryptoUpdate( details ) {
+                const indexOfCurrency = this.currencies.map( currency => currency.code ).indexOf( details.base )
+                this.set( `currencies.${indexOfCurrency}.price`, details.amount);
             }
         }
 
